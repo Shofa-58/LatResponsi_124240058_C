@@ -58,7 +58,7 @@ void buatqueue()
 
 struct UndoAction
 {
-    string aksi;  // “TAMBAH”, “HAPUS”, “PLAYLIST”, “TONTON”
+    string aksi; // “TAMBAH”, “HAPUS”, “PLAYLIST”, “TONTON”
     Video dataundo;
     UndoAction *next;
 };
@@ -91,7 +91,8 @@ bool undoKosong()
 
 UndoAction *popUndo()
 {
-    if (undoKosong()) return NULL;
+    if (undoKosong())
+        return NULL;
     UndoAction *actionToReturn = undoTop;
     undoTop = undoTop->next;
     return actionToReturn;
@@ -131,7 +132,7 @@ void insert(ptbNode *&root, const Video &value)
 {
     if (root == nullptr)
     {
-        root = new ptbNode(value); // kalo pohon kosong
+        root = new ptbNode(value);
         return;
     }
 
@@ -143,6 +144,7 @@ void insert(ptbNode *&root, const Video &value)
             if (bantu->left == nullptr)
             {
                 bantu->left = new ptbNode(value);
+                cout << "Video Telah di tambahkan" << endl;
                 return;
             }
             bantu = bantu->left;
@@ -152,13 +154,15 @@ void insert(ptbNode *&root, const Video &value)
             if (bantu->right == nullptr)
             {
                 bantu->right = new ptbNode(value);
+                cout << "Video Telah di tambahkan" << endl;
                 return;
             }
             bantu = bantu->right;
         }
         else
         {
-            cout << "Tidak dapat menambahkan" << value.Judul << " Judul Telah ada";
+            cout << "Tidak dapat menambahkan \"" << value.Judul << "\" Judul Telah ada\n";
+            return;
         }
     }
 }
@@ -171,7 +175,6 @@ void Undo_Tambah_Video(const Video &temp)
 
 void Tambah_Video()
 {
-
     Video tempstruct;
     cout << "\n=====================================\n";
     cout << "         INPUT DATA PESANAN\n";
@@ -181,11 +184,11 @@ void Tambah_Video()
     getline(cin, tempstruct.Judul);
     cout << "Durasi Video (menit): ";
     cin >> tempstruct.durasi;
+    cin.ignore();
 
     insert(root, tempstruct);
-    cout << "Video Telah di tambahkan" << endl;
 
-    pushUndo("TAMBAH", tempstruct); //aksi untuk undo
+    pushUndo("TAMBAH", tempstruct); // aksi untuk undo
 }
 
 void urutkan_data(ptbNode *root)
@@ -250,7 +253,7 @@ void Tampilkan_Daftar_Video()
 
 void Undo_Tambahkan_Ke_Playlist(const Video &temp)
 {
-    //Kembalikan status di pohon ke TERSEDIA
+    // Kembalikan status di pohon ke TERSEDIA
     ptbNode *bantu = root;
     while (bantu)
     {
@@ -265,7 +268,7 @@ void Undo_Tambahkan_Ke_Playlist(const Video &temp)
             bantu = bantu->right;
     }
 
-    //Hapus video itu dari queue (bisa di depan atau di tengah)
+    // Hapus video itu dari queue (bisa di depan atau di tengah)
     queue *current = depan, *prev = NULL;
     while (current)
     {
@@ -316,11 +319,11 @@ void Tambahkan_Ke_Playlist()
                 return;
             }
 
-            //Simpan data Video (sebelum ubah status) ke Undo
+            // Simpan data Video (sebelum ubah status) ke Undo
             Video v = bantu->Data;
             pushUndo("PLAYLIST", v);
 
-            //Enqueue ke playlist
+            // Enqueue ke playlist
             queue *NB = new queue;
             NB->playlist = bantu->Data;
             NB->next = NULL;
@@ -378,7 +381,7 @@ void Undo_Tonton_Video(const Video &temp)
     if (belakang == NULL)
         belakang = newQ;
 
-    //Kembalikan status di pohon menjadi "SEDANG DIPUTAR"
+    // Kembalikan status di pohon menjadi "SEDANG DIPUTAR"
     ptbNode *bantu = root;
     while (bantu)
     {
@@ -413,10 +416,10 @@ void Tonton_Video()
             Video temp = bantu->Data;
             pushUndo("TONTON", temp);
 
-            //Ubah status di Pohon jadi TERSEDIA
+            // Ubah status di Pohon jadi TERSEDIA
             bantu->Data.status = "TERSEDIA";
 
-            //Pindahkan ke stack riwayat
+            // Pindahkan ke stack riwayat
             stack *newNode = new stack;
             newNode->riwayat = bantu->Data;
             newNode->lanjut = NULL;
@@ -428,14 +431,14 @@ void Tonton_Video()
                 top = newNode;
             }
 
-            //Dequeue dari playlist
+            // Dequeue dari playlist
             queue *hapus = depan;
             depan = depan->next;
             delete hapus;
             if (depan == NULL)
                 belakang = NULL;
 
-            //Update status video berikutnya jadi “SEDANG DIPUTAR”
+            // Update status video berikutnya jadi “SEDANG DIPUTAR”
             if (depan != NULL)
             {
                 ptbNode *bantu2 = root;
@@ -501,9 +504,9 @@ void Undo_Hapus_Video(const Video &temp)
 
 void Hapus_Video()
 {
-    if (queuekosong())
+    if (!root)
     {
-        cout << "Tidak Ada Video dalam Playlist" << endl;
+        cout << "Tidak Ada Video " << endl;
         return;
     }
 
@@ -571,7 +574,7 @@ void Undo_Tindakan_Terakhir()
     UndoAction *act = popUndo();
     string t = act->aksi;
     Video v = act->dataundo;
-    delete act;  // buang node aksi baru dari stack
+    delete act; // buang node aksi baru dari stack
 
     if (t == "TAMBAH")
     {
@@ -648,7 +651,7 @@ int main()
             Hapus_Video();
             break;
         }
-                case 7:
+        case 7:
         {
             Undo_Tindakan_Terakhir();
             break;
